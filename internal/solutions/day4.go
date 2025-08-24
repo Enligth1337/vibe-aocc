@@ -66,33 +66,33 @@ func (d *Day4Solution) Ch1(input []byte) (string, error) {
 func (d *Day4Solution) Ch2(input []byte) (string, error) {
 	lines := strings.Split(string(input), "\n")
 
-	// Убираем пустые строки и объединяем в одну строку
-	var gridString string
+	// Убираем пустые строки
+	var grid []string
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line != "" {
-			gridString += line
+			grid = append(grid, line)
 		}
 	}
 
-	if len(gridString) == 0 {
-		return "Empty input", nil
+	if len(grid) == 0 {
+		return "Empty grid", nil
 	}
 
-	// Создаем регулярное выражение для поиска X-MAS паттернов
-	// Паттерн: M.S.A.M.S (где . - любой символ, A - центр)
-	// Это означает, что от центра 'A' идут две "MAS" в противоположных направлениях
-	// Но нужно учесть, что это должно быть в форме X, а не просто последовательность
-	// Давайте попробуем другой подход - искать все возможные X-паттерны
+	rows := len(grid)
+	cols := len(grid[0])
 
-	// Ищем все позиции символа 'A' и проверяем, может ли там быть центр X-MAS
 	totalXMAS := 0
 
-	for i := 0; i < len(gridString); i++ {
-		if gridString[i] == 'A' {
-			// Проверяем, может ли здесь быть центр X-MAS
-			if d.checkXMASAtPosition(gridString, i) {
-				totalXMAS++
+	// Проходим по каждой позиции в сетке
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			// Проверяем, может ли здесь быть центр X-MAS (должен быть символ 'A')
+			if grid[row][col] == 'A' {
+				// Проверяем X-MAS паттерн с центром в этой позиции
+				if d.checkXMASDiagonal(grid, row, col, rows, cols) {
+					totalXMAS++
+				}
 			}
 		}
 	}
@@ -269,4 +269,40 @@ func (d *Day4Solution) checkWord(grid []string, row, col, dRow, dCol, rows, cols
 	}
 
 	return true
+}
+
+// checkXMASDiagonal проверяет, есть ли X-MAS с центром в позиции (row, col)
+// используя диагональные позиции выше и ниже
+func (d *Day4Solution) checkXMASDiagonal(grid []string, row, col, rows, cols int) bool {
+	// Проверяем, что можем проверить строки выше и ниже
+	if row == 0 || row == rows-1 {
+		return false
+	}
+
+	// Проверяем, что можем проверить столбцы слева и справа
+	if col == 0 || col == cols-1 {
+		return false
+	}
+
+	// Проверяем диагональные позиции выше 'A'
+	// Левая диагональ выше: (row-1, col-1)
+	// Правая диагональ выше: (row-1, col+1)
+
+	// Левая диагональ выше и ниже
+	leftAbove := grid[row-1][col-1]
+	leftBelow := grid[row+1][col-1]
+
+	// Правая диагональ выше и ниже
+	rightAbove := grid[row-1][col+1]
+	rightBelow := grid[row+1][col+1]
+
+	// Проверяем, что ОБЕ диагонали содержат противоположные символы
+	// Левая диагональ должна содержать 'M' и 'S' (в любом порядке)
+	leftValid := (leftAbove == 'M' && leftBelow == 'S') || (leftAbove == 'S' && leftBelow == 'M')
+
+	// Правая диагональ должна содержать 'M' и 'S' (в любом порядке)
+	rightValid := (rightAbove == 'M' && rightBelow == 'S') || (rightAbove == 'S' && rightBelow == 'M')
+
+	// Обе диагонали должны быть валидными для формирования X-MAS
+	return leftValid && rightValid
 }
