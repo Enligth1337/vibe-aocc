@@ -1,0 +1,2 @@
+# Input file for day 18
+# Add your input data here

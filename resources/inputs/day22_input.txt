@@ -1,0 +1,2 @@
+# Input file for day 22
+# Add your input data here
