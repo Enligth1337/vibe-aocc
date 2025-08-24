@@ -90,7 +90,7 @@ func (d *Day4Solution) Ch2(input []byte) (string, error) {
 			// Проверяем, может ли здесь быть центр X-MAS (должен быть символ 'A')
 			if grid[row][col] == 'A' {
 				// Проверяем X-MAS паттерн с центром в этой позиции
-				if d.checkXMASDiagonal(grid, row, col, rows, cols) {
+				if d.checkXMASPattern(grid, row, col, rows, cols) {
 					totalXMAS++
 				}
 			}
@@ -98,80 +98,6 @@ func (d *Day4Solution) Ch2(input []byte) (string, error) {
 	}
 
 	return fmt.Sprintf("Total X-MAS occurrences: %d", totalXMAS), nil
-}
-
-// checkXMASAtPosition проверяет, может ли в позиции pos быть центр X-MAS
-func (d *Day4Solution) checkXMASAtPosition(gridString string, pos int) bool {
-	// Проверяем, что позиция находится в допустимых границах
-	if pos < 0 || pos >= len(gridString) {
-		return false
-	}
-
-	// Проверяем, что в позиции находится символ 'A'
-	if gridString[pos] != 'A' {
-		return false
-	}
-
-	// Проверяем все возможные X-паттерны с центром в этой позиции
-	// Для простоты, давайте проверим, есть ли две "MAS" в противоположных направлениях
-
-	// Ищем "MAS" влево и "MAS" вправо
-	leftMAS := d.findMASLeft(gridString, pos)
-	rightMAS := d.findMASRight(gridString, pos)
-
-	if leftMAS && rightMAS {
-		return true
-	}
-
-	// Ищем "MAS" вверх и "MAS" вниз (если это сетка)
-	// Но поскольку у нас одна строка, это сложнее
-
-	return false
-}
-
-// findMASLeft ищет "MAS" слева от позиции pos
-func (d *Day4Solution) findMASLeft(gridString string, pos int) bool {
-	if pos < 3 {
-		return false
-	}
-
-	// Проверяем паттерн "MAS" слева
-	if gridString[pos-3] == 'M' && gridString[pos-2] == 'A' && gridString[pos-1] == 'S' {
-		return true
-	}
-
-	// Проверяем паттерн "SAM" слева
-	if gridString[pos-3] == 'S' && gridString[pos-2] == 'A' && gridString[pos-1] == 'M' {
-		return true
-	}
-
-	return false
-}
-
-// findMASRight ищет "MAS" справа от позиции pos
-func (d *Day4Solution) findMASRight(gridString string, pos int) bool {
-	if pos+3 >= len(gridString) {
-		return false
-	}
-
-	// Проверяем паттерн "MAS" справа
-	if gridString[pos+1] == 'M' && gridString[pos+2] == 'A' && gridString[pos+3] == 'S' {
-		return true
-	}
-
-	// Проверяем паттерн "SAM" справа
-	if gridString[pos+1] == 'S' && gridString[pos+2] == 'A' && gridString[pos+3] == 'M' {
-		return true
-	}
-
-	return false
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 // checkXMAS проверяет, начинается ли слово XMAS с позиции (row, col) в направлении (dRow, dCol)
@@ -199,81 +125,6 @@ func (d *Day4Solution) checkXMAS(grid []string, row, col, dRow, dCol, rows, cols
 
 // checkXMASPattern проверяет, есть ли X-MAS с центром в позиции (row, col)
 func (d *Day4Solution) checkXMASPattern(grid []string, row, col, rows, cols int) bool {
-	// Проверяем две пары диагональных направлений для формирования X
-	directionPairs := [][][]int{
-		{{-1, -1}, {1, 1}}, // влево-вверх + вправо-вниз
-		{{-1, 1}, {1, -1}}, // вправо-вверх + влево-вниз
-	}
-
-	// Для каждой пары направлений проверяем, можем ли мы найти X-MAS
-	for _, pair := range directionPairs {
-		if d.canFormXMAS(grid, row, col, pair[0][0], pair[0][1], rows, cols) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// canFormXMAS проверяет, может ли с центром в (row, col) сформироваться X-MAS
-// используя направление (dRow, dCol) и противоположное ему
-func (d *Day4Solution) canFormXMAS(grid []string, row, col, dRow, dCol, rows, cols int) bool {
-	// Проверяем первую MAS в направлении (dRow, dCol) от центра 'A'
-	mas1 := d.checkMAS(grid, row, col, dRow, dCol, rows, cols)
-	if !mas1 {
-		return false
-	}
-
-	// Проверяем вторую MAS в противоположном направлении (-dRow, -dCol) от центра 'A'
-	mas2 := d.checkMAS(grid, row, col, -dRow, -dCol, rows, cols)
-	if !mas2 {
-		return false
-	}
-
-	return true
-}
-
-// checkMAS проверяет, есть ли MAS в направлении (dRow, dCol) от позиции (row, col)
-func (d *Day4Solution) checkMAS(grid []string, row, col, dRow, dCol, rows, cols int) bool {
-	// Проверяем MAS вперед: от центра 'A' ищем полное слово "MAS"
-	forward := d.checkWord(grid, row, col, dRow, dCol, rows, cols, "MAS")
-	if forward {
-		return true
-	}
-
-	// Проверяем MAS назад: от центра 'A' ищем полное слово "SAM"
-	backward := d.checkWord(grid, row, col, dRow, dCol, rows, cols, "SAM")
-	if backward {
-		return true
-	}
-
-	return false
-}
-
-// checkWord проверяет, есть ли слово в направлении (dRow, dCol) от позиции (row, col)
-func (d *Day4Solution) checkWord(grid []string, row, col, dRow, dCol, rows, cols int, word string) bool {
-	// Проверяем, что можем пройти всю длину слова в данном направлении
-	for i := 0; i < len(word); i++ {
-		newRow := row + i*dRow
-		newCol := col + i*dCol
-
-		// Проверяем границы
-		if newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols {
-			return false
-		}
-
-		// Проверяем, что символ совпадает
-		if grid[newRow][newCol] != word[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-// checkXMASDiagonal проверяет, есть ли X-MAS с центром в позиции (row, col)
-// используя диагональные позиции выше и ниже
-func (d *Day4Solution) checkXMASDiagonal(grid []string, row, col, rows, cols int) bool {
 	// Проверяем, что можем проверить строки выше и ниже
 	if row == 0 || row == rows-1 {
 		return false
@@ -284,24 +135,27 @@ func (d *Day4Solution) checkXMASDiagonal(grid []string, row, col, rows, cols int
 		return false
 	}
 
-	// Проверяем диагональные позиции выше 'A'
-	// Левая диагональ выше: (row-1, col-1)
-	// Правая диагональ выше: (row-1, col+1)
+	// Проверяем диагональные позиции для формирования X
+	// Левая диагональ: (row-1, col-1) и (row+1, col-1)
+	// Правая диагональ: (row-1, col+1) и (row+1, col+1)
 
-	// Левая диагональ выше и ниже
 	leftAbove := grid[row-1][col-1]
 	leftBelow := grid[row+1][col-1]
-
-	// Правая диагональ выше и ниже
 	rightAbove := grid[row-1][col+1]
 	rightBelow := grid[row+1][col+1]
 
-	// Проверяем, что ОБЕ диагонали содержат противоположные символы
-	// Левая диагональ должна содержать 'M' и 'S' (в любом порядке)
-	leftValid := (leftAbove == 'M' && leftBelow == 'S') || (leftAbove == 'S' && leftBelow == 'M')
+	// Если leftAbove == rightBelow, то по диагонали будет SAS или MAM - невалидно
+	// if leftAbove == rightBelow {
+	// 	return false
+	// }
 
-	// Правая диагональ должна содержать 'M' и 'S' (в любом порядке)
-	rightValid := (rightAbove == 'M' && rightBelow == 'S') || (rightAbove == 'S' && rightBelow == 'M')
+	// Проверяем, что левая диагональ содержит M и S (разность ASCII == 6)
+	// Диагональ валидна если содержит M и S (|leftAbove - leftBelow| == 6)
+	leftValid := abs(int(leftAbove)-int(rightBelow)) == 6
+
+	// Проверяем, что правая диагональ содержит M и S (разность ASCII == 6)
+	// Диагональ валидна если содержит M и S (|rightAbove - rightBelow| == 6)
+	rightValid := abs(int(leftBelow)-int(rightAbove)) == 6
 
 	// Обе диагонали должны быть валидными для формирования X-MAS
 	return leftValid && rightValid

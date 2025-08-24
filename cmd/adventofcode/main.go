@@ -12,27 +12,35 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run cmd/adventofcode/main.go <day>")
+		fmt.Println("Usage: go run cmd/adventofcode/main.go <day> [test_file]")
 		fmt.Println("Example: go run cmd/adventofcode/main.go day1")
+		fmt.Println("Example: go run cmd/adventofcode/main.go day4 test_example.txt")
 		os.Exit(1)
 	}
 
 	day := os.Args[1]
 
-	// Загружаем конфигурацию
-	cfg, err := config.Load("config.yml")
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
-	}
+	var inputFilePath string
 
-	// Получаем задачу по дню
-	task, err := cfg.GetTaskByDay(day)
-	if err != nil {
-		log.Fatalf("Failed to get task: %v", err)
-	}
+	if len(os.Args) >= 3 {
+		// Если передан второй аргумент, используем его как тестовый файл
+		inputFilePath = os.Args[2]
+	} else {
+		// Иначе загружаем конфигурацию
+		cfg, err := config.Load("config.yml")
+		if err != nil {
+			log.Fatalf("Failed to load config: %v", err)
+		}
 
-	// Получаем путь к файлу ввода
-	inputFilePath := cfg.GetInputFilePath(task)
+		// Получаем задачу по дню
+		task, err := cfg.GetTaskByDay(day)
+		if err != nil {
+			log.Fatalf("Failed to get task: %v", err)
+		}
+
+		// Получаем путь к файлу ввода
+		inputFilePath = cfg.GetInputFilePath(task)
+	}
 
 	// Читаем файл ввода
 	inputData, err := os.ReadFile(inputFilePath)

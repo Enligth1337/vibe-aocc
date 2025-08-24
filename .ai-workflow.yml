@@ -1,0 +1,61 @@
+# Конфигурация AI Git Workflow
+ai_git_workflow:
+  # Настройки веток
+  branches:
+    default_target: "dev"
+    feature_prefix: "feature/ai-update"
+    protected_branches: ["master", "dev", "main"]
+  
+  # Настройки коммитов
+  commits:
+    auto_branch: true
+    auto_push: true
+    message_template: "AI update: {description} - {timestamp}"
+    include_timestamp: true
+  
+  # Настройки MR/PR
+  merge_requests:
+    auto_create: false  # Пока только через веб-интерфейс
+    target_branch: "dev"
+    title_template: "AI Update: {description}"
+    description_template: |
+      🤖 Автоматическое обновление от AI агента
+      
+      **Описание изменений:**
+      {description}
+      
+      **Файлы изменены:**
+      {changed_files}
+      
+      **Тип изменений:**
+      - [ ] Bug fix
+      - [ ] New feature
+      - [ ] Code refactoring
+      - [ ] Documentation update
+      - [ ] Test update
+      
+      **Проверено:**
+      - [ ] Код компилируется
+      - [ ] Тесты проходят
+      - [ ] Линтер не выдает ошибок
+  
+  # Настройки уведомлений
+  notifications:
+    show_commands: true
+    show_next_steps: true
+    emoji_support: true
+  
+  # Шаблоны для разных типов изменений
+  templates:
+    bug_fix:
+      branch_suffix: "bugfix"
+      commit_prefix: "🐛 Fix:"
+    feature:
+      branch_suffix: "feature"
+      commit_prefix: "✨ Feature:"
+    refactor:
+      branch_suffix: "refactor"
+      commit_prefix: "♻️ Refactor:"
+    docs:
+      branch_suffix: "docs"
+      commit_prefix: "📚 Docs:"
